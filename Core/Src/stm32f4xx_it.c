@@ -42,6 +42,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 
+/// Biến đếm thời gian, để đo độ rộng xung echo, được thực hiện bởi TIM6
+int tim6_count  = 0 ;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -199,11 +202,49 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line0 interrupt.
+  * @description Xảy ra khi nút B1 được bấm
+  */
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+	/// Cho chân TRIG = 1 để bắt đầu quá trình phát siêu âm
+	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_SET);
+
+	/// Duy trì luồn xiêu âm trong 1 us, bằng cách giữ nguyên mức logic 1 của TRIG trong 10 us
+	/// Mỗi lần lặp tiêu hao 0.1us, nên việc lặp 100 lần tương ứng với 0.1 * 100 = 10 us
+	int t6count = 100;
+	while (t6count--);
+
+	/// Cho chân TRIG = 0 để dừng phát siêu âm
+	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_RESET);
+
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line[15:10] interrupts.
+  * @description Xảy ra khi chân ECHO nhận được tín hiệu siêu âm dội về
   */
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+	/// Đọc trạng thái của chân ECHO, để xác định loại sườn tin hiệu là sườn lên hay sườn xuống
+	int state = HAL_GPIO_ReadPin(SR04_ECHO_GPIO_Port, SR04_ECHO_Pin);
+	if (state = GPIO_PIN_SET) {
+		/// Nếu là sườn lên, tưc là mới bắt đầu nhận được siêu âm dội lại thì...
+		/// bắt đầu đêm từ 0.
+		tim6_count = 0;
+	} else
+	{
+		/// Nếu là sườn xuống, tưc là siêu âm đã dừng lại
+		int echo = tim6_count;
+	}
+	HAL_GPIO_TogglePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin);
 
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SR04_ECHO_Pin);
