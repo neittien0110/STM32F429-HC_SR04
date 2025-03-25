@@ -203,7 +203,6 @@ void SysTick_Handler(void)
 
 /**
   * @brief This function handles EXTI line0 interrupt.
-  * @description Xảy ra khi nút B1 được bấm
   */
 void EXTI0_IRQHandler(void)
 {
@@ -228,7 +227,6 @@ void EXTI0_IRQHandler(void)
 
 /**
   * @brief This function handles EXTI line[15:10] interrupts.
-  * @description Xảy ra khi chân ECHO nhận được tín hiệu siêu âm dội về
   */
 void EXTI15_10_IRQHandler(void)
 {
