@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>					//Tạo nội dung để gửi về máy tính qua UART - COM để debug
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +45,12 @@
 
 /// Biến đếm thời gian, để đo độ rộng xung echo, được thực hiện bởi TIM6
 int tim6_count  = 0 ;
+
+/// Handler điều khiển UART1 - COM, đã được chuyển đổi sẵn thành cổng USB mini trên board
+extern UART_HandleTypeDef huart1;
+
+/// Bộ đệm dữ liệu để truyên đi trên UART
+char uarft_trans_buffer[123];
 
 /* USER CODE END PV */
 
@@ -207,13 +214,19 @@ void SysTick_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
+	///
+	HAL_UART_Transmit(&huart1, "B1\r\n", 5, 2);
 	/// Cho chân TRIG = 1 để bắt đầu quá trình phát siêu âm
 	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_SET);
 
-	/// Duy trì luồn xiêu âm trong 1 us, bằng cách giữ nguyên mức logic 1 của TRIG trong 10 us
-	/// Mỗi lần lặp tiêu hao 0.1us, nên việc lặp 100 lần tương ứng với 0.1 * 100 = 10 us
-	int t6count = 100;
-	while (t6count--);
+	if (false) {
+		/// Duy trì luồn xiêu âm trong 1 us, bằng cách giữ nguyên mức logic 1 của TRIG trong 10 us
+		/// Mỗi lần lặp tiêu hao 0.1us, nên việc lặp 100 lần tương ứng với 0.1 * 100 = 10 us
+		int t6count = 100;
+		while (t6count--);
+	}else {
+		HAL_Delay(10);	// Giữ xung Trig ở mức cao trong 10us
+	}
 
 	/// Cho chân TRIG = 0 để dừng phát siêu âm
 	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_RESET);
@@ -233,16 +246,24 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 	/// Đọc trạng thái của chân ECHO, để xác định loại sườn tin hiệu là sườn lên hay sườn xuống
 	int state = HAL_GPIO_ReadPin(SR04_ECHO_GPIO_Port, SR04_ECHO_Pin);
-	if (state = GPIO_PIN_SET) {
+	if (state == GPIO_PIN_SET) {
+		HAL_UART_Transmit(&huart1, "...\r\n", 5, HAL_MAX_DELAY);
 		/// Nếu là sườn lên, tưc là mới bắt đầu nhận được siêu âm dội lại thì...
 		/// bắt đầu đêm từ 0.
 		tim6_count = 0;
+		/// Bắt đầu đếm;
+		HAL_TIM_Base_Start_IT(&htim6);
 	} else
 	{
+		/// Dừng đếm
+		HAL_TIM_Base_Stop_IT(&htim6);
 		/// Nếu là sườn xuống, tưc là siêu âm đã dừng lại
 		int echo = tim6_count;
+		/// Hiển thị
+		sprintf(uarft_trans_buffer, "Number: %d\r\n", echo);
+		HAL_UART_Transmit(&huart1, uarft_trans_buffer, strlen(uarft_trans_buffer), HAL_MAX_DELAY);
 	}
-	HAL_GPIO_TogglePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin);
+	//HAL_GPIO_TogglePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin);
 
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SR04_ECHO_Pin);
@@ -257,7 +278,8 @@ void EXTI15_10_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-
+	///Đếm thời gian
+	tim6_count++;
   /* USER CODE END TIM6_DAC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim6);
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
