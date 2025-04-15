@@ -215,7 +215,7 @@ void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
 	///
-	HAL_UART_Transmit(&huart1, (const char *)"B1\r\n", 4, 2);
+	HAL_UART_Transmit(&huart1, "B1\r\n", 4, 2);
 	/// Cho chân TRIG = 1 để bắt đầu quá trình phát siêu âm
 	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_SET);
 
@@ -234,7 +234,7 @@ void EXTI0_IRQHandler(void)
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(B1_Pin);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
-  HAL_UART_Transmit(&huart1, "...\r\n", 5, 2);
+  HAL_UART_Transmit(&huart1, (const uint8_t *)("...\r\n"), 5, 2);
   /* USER CODE END EXTI0_IRQn 1 */
 }
 
@@ -262,7 +262,7 @@ void EXTI15_10_IRQHandler(void)
 	    //int pulse_width = __HAL_TIM_GET_COUNTER(&htim6);
 	    int distance = (pulse_width * 0.034) / 2;
 		/// Hiển thị
-		sprintf((char *)uarft_trans_buffer, (const char *)"Number: %d\r\n", distance);
+		sprintf((char *)uarft_trans_buffer, "Number: %d\r\n", distance);
 		HAL_UART_Transmit(&huart1, ( const uint8_t *) uarft_trans_buffer, strlen(uarft_trans_buffer), HAL_MAX_DELAY);
 	}
 	//HAL_GPIO_TogglePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin);
