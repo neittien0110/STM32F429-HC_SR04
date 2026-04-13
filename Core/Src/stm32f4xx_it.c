@@ -22,12 +22,12 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>					//Tạo nội dung để gửi về máy tính qua UART - COM để debug
+#include <stdio.h>					// Để sử dụng chính xác hàm sprintf mà không bị warning với kiểu dữ liệu char *
+#include <string.h>					// Để sử dụng chính xác các hàm xử lý chuỗi mà không bị warning với kiểu dữ liệu char *
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -215,7 +215,7 @@ void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
 	///
-	HAL_UART_Transmit(&huart1, "B1\r\n", 4, 2);
+	HAL_UART_Transmit(&huart1, (const uint8_t*)"B1\r\n", 4, 2);
 	/// Cho chân TRIG = 1 để bắt đầu quá trình phát siêu âm
 	HAL_GPIO_WritePin(SR04_TRIG_GPIO_Port, SR04_TRIG_Pin, GPIO_PIN_SET);
 
