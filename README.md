@@ -7,6 +7,8 @@ Dự án này thực hiện việc đo khoảng cách bằng cảm biến siêu 
 - Bấm nút B1
 - xem kết quả trả về trên màn hinh Serial
 
+![Connect STM32F429I-DISC1 to HC-04](./images/HC04andSTM32_pin.png)
+
 ## 1. Nguyên lý hoạt động
 
 Hệ thống hoạt động dựa trên nguyên lý phản xạ sóng âm (Time of Flight):
