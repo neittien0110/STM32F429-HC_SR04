@@ -9,6 +9,20 @@ Dự án này thực hiện việc đo khoảng cách bằng cảm biến siêu 
 
 ![Connect STM32F429I-DISC1 to HC-04](./images/HC04andSTM32_pin.png)
 
+## Bill of Materials / Danh sách linh kiện
+
+- 1 x Module siêu âm đo khoảng cách [HC_SR04](https://chotroihn.vn/cam-bien-sieu-am-srf04) (hoặc SR-05 y hệt)
+- 4 x Dây [cái-cái](https://chotroihn.vn/day-cam-test-board-day-duc-duc-day-duc-cai-day-cai-cai-day-noi-7-mau-10cm)
+
+## Kết nối
+
+STM32F429-DISC1 | SR-04
+-- | --
+5v | VCC
+PD10 | ECHO
+PD9 | TRIG
+0v | GND
+
 ## 1. Nguyên lý hoạt động
 
 Hệ thống hoạt động dựa trên nguyên lý phản xạ sóng âm (Time of Flight):
@@ -75,6 +89,9 @@ Dựa trên cấu hình trong mã nguồn:
 - **SR04_ECHO_Pin**: Cấu hình ngắt ngoài `EXTI15_10_IRQn`, chế độ `GPIO_MODE_IT_RISING_FALLING` để bắt được cả thời điểm bắt đầu và kết thúc xung phản hồi.
 - **USART1 (PA9 - TX, PA10 - RX)**: Cấu hình tốc độ baud 115200 để truyền dữ liệu khoảng cách lên máy tính.
 
+![Configure GPIO](images/ConfigureGPIO.png)
+![Configure UART](images/ConfigureUART.png)
+
 ## 3. Thiết lập Timer 6 (TIM6)
 
 Timer 6 được sử dụng làm bộ đếm thời gian cơ sở để đo độ rộng xung Echo:
@@ -84,9 +101,13 @@ Timer 6 được sử dụng làm bộ đếm thời gian cơ sở để đo đ�
 - **Cơ chế**: Timer được cấu hình để tạo ra ngắt tràn. Trong trình phục vụ ngắt `TIM6_DAC_IRQHandler`, biến `tim6_count` sẽ tăng lên sau mỗi chu kỳ tràn.
 - **Hoạt động**: Timer chỉ chạy khi chân Echo ở mức cao và dừng lại ngay khi Echo xuống mức thấp để lấy giá trị thời gian.
 
+![Configure TIM6](images/ConfigureTIM6.png)
+
 ## 4. Thiết lập chế độ Ngắt (Interrupt)
 
 Dự án sử dụng 3 trình phục vụ ngắt chính:
+![Enable Interrupts](images/EnableInterrupts.png)
+![Enable TIM6 Interrupt](images/EnableTIM6Interrupt.png)
 
 ### Ngắt EXTI0 (Nút nhấn B1)
 
